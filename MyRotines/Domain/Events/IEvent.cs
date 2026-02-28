@@ -1,4 +1,4 @@
-﻿namespace MyRotines.Core.Domain.Events;
+﻿namespace MyRotines.Domain.Events;
 
 /// <summary>
 /// Marker interface for all events in the application

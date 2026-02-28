@@ -1,4 +1,4 @@
-﻿namespace MyRotines.Core.Domain.Events;
+﻿namespace MyRotines.Domain.Events;
 
 public interface IEventPublisher
 {

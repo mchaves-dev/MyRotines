@@ -1,4 +1,4 @@
-﻿namespace MyRotines.Core.Domain.Handlers;
+﻿namespace MyRotines.Domain.Handlers;
 
 /// <summary>
 /// Marker interface for all handlers in the application
