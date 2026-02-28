@@ -37,7 +37,7 @@ public class DownloadCommand(ArquiveDownloadService _arquiveDownloadService, IEv
                  await _arquiveDownloadService.DownloadAsync(settings.Url, settings.Output, cancellationToken);
                  if (settings.Extract)
                  {
-                     await _eventPublisher.PublishAsync(new FileDownloadedEvent(settings.Output, settings.Extract), cancellationToken);
+                     await _eventPublisher.PublishAsync(new FileExtractEvent(settings.Output), cancellationToken);
                  }
              });
 
