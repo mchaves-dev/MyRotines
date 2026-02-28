@@ -2,12 +2,12 @@
 
 namespace MyRotines.Application.Services;
 
-public sealed class ArquiveDownloadService
+public sealed class DownloadService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<ArquiveDownloadService> _logger;
+    private readonly ILogger<DownloadService> _logger;
 
-    public ArquiveDownloadService(IHttpClientFactory factory, ILogger<ArquiveDownloadService> logger)
+    public DownloadService(IHttpClientFactory factory, ILogger<DownloadService> logger)
     {
         _logger = logger;
         _httpClient = factory.CreateClient();

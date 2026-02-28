@@ -2,4 +2,4 @@
 
 namespace MyRotines.Application.Events;
 
-public record FileExtractEvent(string FilePath) : IEvent;
+public record FileDownloadedEvent(string FilePath, bool Extract) : IEvent;

@@ -5,7 +5,7 @@ using Spectre.Console.Cli;
 namespace MyRotines.Application.Commands;
 
 
-public class ExtractCommand(ArquiveExtractService _arquiveExtractService) : AsyncCommand<ExtractCommand.Settings>
+public class ExtractCommand(ExtractionService _arquiveExtractService) : AsyncCommand<ExtractCommand.Settings>
 {
     public class Settings : CommandSettings
     {

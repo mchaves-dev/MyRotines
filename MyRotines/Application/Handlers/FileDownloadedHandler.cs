@@ -5,13 +5,17 @@ using MyRotines.Domain.Events;
 
 namespace MyRotines.Application.Handlers;
 
-public sealed class FileExtractHandler(ILogger<FileExtractHandler> _logger, ArquiveExtractService _arquiveExtractService) : IEventHandler<FileExtractEvent>
+public sealed class FileDownloadedHandler(ILogger<FileDownloadedHandler> _logger, ExtractionService _arquiveExtractService) : IEventHandler<FileDownloadedEvent>
 {
-    public async Task HandleAsync(FileExtractEvent @event, CancellationToken cancellationToken)
+    public async Task HandleAsync(FileDownloadedEvent @event, CancellationToken cancellationToken)
     {
+        if (!@event.Extract)
+            return;
+
         _logger.LogInformation(
             "FileDownloadedEvent received. Path: {FilePath}, Extract: {Extract}",
-            @event.FilePath);
+            @event.FilePath,
+                @event.Extract);
 
         var directory = Path.GetDirectoryName(@event.FilePath);
 

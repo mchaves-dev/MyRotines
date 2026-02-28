@@ -10,8 +10,9 @@ using Spectre.Console.Cli;
 var services = new ServiceCollection();
 services.RegisterHandlersFromAssemblyContaining(typeof(Program));
 services.AddScoped<IEventPublisher, EventPublisher>();
-services.AddScoped<ArquiveDownloadService>();
-services.AddScoped<ArquiveExtractService>();
+services.AddScoped<DownloadService>();
+services.AddScoped<ExtractionService>();
+services.AddScoped<CompressionService>();
 
 // Logging
 services.AddLogging(config =>

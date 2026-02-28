@@ -3,15 +3,8 @@ using System.IO.Compression;
 
 namespace MyRotines.Application.Services;
 
-public sealed class ArquiveExtractService
+public sealed class ExtractionService(ILogger<ExtractionService> _logger)
 {
-    private readonly ILogger<ArquiveDownloadService> _logger;
-
-    public ArquiveExtractService(ILogger<ArquiveDownloadService> logger)
-    {
-        _logger = logger;
-    }
-
     public Task ExtractAsync(string currentPath, string destinationPath, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(currentPath))

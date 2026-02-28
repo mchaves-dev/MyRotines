@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace MyRotines.Application.Commands;
 
-public class DownloadCommand(ArquiveDownloadService _arquiveDownloadService, IEventPublisher _eventPublisher) : AsyncCommand<DownloadCommand.Settings>
+public class DownloadCommand(DownloadService _arquiveDownloadService, IEventPublisher _eventPublisher) : AsyncCommand<DownloadCommand.Settings>
 {
     public class Settings : CommandSettings
     {
@@ -34,11 +34,10 @@ public class DownloadCommand(ArquiveDownloadService _arquiveDownloadService, IEv
         await AnsiConsole.Status()
              .StartAsync("Baixando arquivo...", async ctx =>
              {
-                 await _arquiveDownloadService.DownloadAsync(settings.Url, settings.Output, cancellationToken);
-                 if (settings.Extract)
-                 {
-                     await _eventPublisher.PublishAsync(new FileExtractEvent(settings.Output), cancellationToken);
-                 }
+                 await _arquiveDownloadService
+                    .DownloadAsync(settings.Url, settings.Output, cancellationToken);
+
+                 await _eventPublisher.PublishAsync(new FileDownloadedEvent(settings.Output, settings.Extract), cancellationToken);
              });
 
         AnsiConsole.MarkupLine("[green]Download concluído![/]");
