@@ -1,9 +1,11 @@
-ï»¿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace MyRotines.Application.Services;
 
 public sealed class DownloadService
 {
+    private static readonly byte[] ZipHeader = [0x50, 0x4B, 0x03, 0x04];
+
     private readonly HttpClient _httpClient;
     private readonly ILogger<DownloadService> _logger;
 
@@ -17,22 +19,24 @@ public sealed class DownloadService
     {
         if (string.IsNullOrWhiteSpace(url))
         {
-            _logger.LogWarning("Failed to download from url is empty.");
-            return;
+            throw new ArgumentException("URL é obrigatória.", nameof(url));
         }
 
-        HttpResponseMessage? response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        HttpResponseMessage response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            _logger.LogWarning("Failed to download from {Url}. Status code: {StatusCode}", url, response.StatusCode);
-            return;
+            throw new InvalidOperationException($"Falha no download. HTTP {(int)response.StatusCode}.");
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+        var destinationDirectory = Path.GetDirectoryName(destinationPath);
+
+        if (!string.IsNullOrWhiteSpace(destinationDirectory))
+        {
+            Directory.CreateDirectory(destinationDirectory);
+        }
 
         await using var httpStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-
         await using var fileStream = new FileStream(
             destinationPath,
             FileMode.Create,
@@ -42,5 +46,32 @@ public sealed class DownloadService
             useAsync: true);
 
         await httpStream.CopyToAsync(fileStream, cancellationToken);
+        await fileStream.FlushAsync(cancellationToken);
+
+        var looksLikeZip = await LooksLikeZipAsync(destinationPath, cancellationToken);
+        if (!looksLikeZip)
+        {
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "desconhecido";
+            throw new InvalidDataException(
+                $"Arquivo baixado não parece ZIP válido (Content-Type: {contentType}). " +
+                "Se a URL tiver '&', execute entre aspas duplas no CMD.");
+        }
+
+        _logger.LogInformation("Download concluído: {DestinationPath}", destinationPath);
+    }
+
+    private static async Task<bool> LooksLikeZipAsync(string filePath, CancellationToken cancellationToken)
+    {
+        await using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4, useAsync: true);
+
+        if (stream.Length < 4)
+        {
+            return false;
+        }
+
+        var header = new byte[4];
+        var read = await stream.ReadAsync(header, cancellationToken);
+
+        return read == 4 && header.SequenceEqual(ZipHeader);
     }
 }

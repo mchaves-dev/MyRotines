@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 
 namespace MyRotines.Application;
@@ -33,7 +33,15 @@ public sealed class TypeResolver : ITypeResolver, IDisposable
         _provider = provider;
     }
 
-    public object Resolve(Type type) => _provider.GetRequiredService(type);
+    public object? Resolve(Type? type)
+    {
+        if (type is null)
+        {
+            return null;
+        }
+
+        return _provider.GetService(type);
+    }
 
     public void Dispose() => _provider.Dispose();
 }

@@ -1,5 +1,9 @@
-﻿using MyRotines.Domain.Events;
+using MyRotines.Domain.Events;
 
 namespace MyRotines.Application.Events;
 
-public record FileDownloadedEvent(string FilePath, bool Extract) : IEvent;
+public sealed record FileDownloadedEvent(
+    string FilePath,
+    bool Extract,
+    string? MoveToDirectory,
+    bool CleanupDownloadedFile) : IEvent;

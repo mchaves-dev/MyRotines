@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MyRotines.Domain.Events;
 
 namespace MyRotines.Application;
-
 
 /// <summary>
 /// Implementation of IEventPublisher that resolves all handlers for an event and executes them in parallel
@@ -32,7 +31,6 @@ public class EventPublisher(IServiceProvider serviceProvider, ILogger<EventPubli
 
         try
         {
-            // Resolve all handlers for this event type
             var handlers = serviceProvider.GetServices<IEventHandler<TEvent>>().ToArray();
 
             if (handlers.Length == 0)
@@ -43,30 +41,28 @@ public class EventPublisher(IServiceProvider serviceProvider, ILogger<EventPubli
 
             logger.LogDebug("Found {HandlerCount} handlers for event {EventType}", handlers.Length, eventType.Name);
 
-            // Execute all handlers and collect results
             var handlerTasks = handlers
                 .Select(handler => ExecuteHandlerAsync(handler, @event, cancellationToken))
                 .ToList();
 
             await Task.WhenAll(handlerTasks);
 
-            // Check for exceptions
             var exceptions = handlerTasks
-                .Select(t => t.Exception)
-                .Where(ex => ex != null)
+                .Select(task => task.Result)
+                .Where(ex => ex is not null)
+                .Cast<Exception>()
                 .ToList();
 
             if (exceptions.Count > 0)
             {
                 logger.LogError("One or more handlers threw exceptions while processing event {EventType}", eventType.Name);
-                throw new AggregateException($"One or more handlers threw exceptions while processing event {eventType.Name}", exceptions!);
+                throw new AggregateException($"One or more handlers threw exceptions while processing event {eventType.Name}", exceptions);
             }
 
             logger.LogDebug("Successfully published event {EventType}", eventType.Name);
         }
         catch (AggregateException)
         {
-            // Let the aggregate exception propagate as is
             throw;
         }
         catch (Exception ex)
