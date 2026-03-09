@@ -34,6 +34,9 @@ services.AddScoped<ExtractionService>();
 services.AddScoped<CompressionService>();
 services.AddScoped<FileMoveService>();
 services.AddScoped<SqlServerRestoreService>();
+services.AddScoped<FileInventoryService>();
+services.AddScoped<FileCleanupService>();
+services.AddScoped<FileMonitorService>();
 
 services.AddScoped<IRoutineStep, DownloadRoutineStep>();
 services.AddScoped<IRoutineStep, ExtractRoutineStep>();
@@ -76,6 +79,15 @@ app.Configure(config =>
     config.AddCommand<RestoreSqlCommand>("restore-sql")
         .WithDescription("Restaura arquivo .bak no SQL Server")
         .WithExample(new[] { "restore-sql", "--backup", "c:\\temp\\db.bak", "--sql-server", ".\\SQLEXPRESS", "--sql-db", "MinhaBase", "--sql-trusted", "--sql-replace" });
+
+    config.AddCommand<InventoryCommand>("inventory")
+        .WithDescription("Mostra inventário de arquivos por extensão");
+
+    config.AddCommand<CleanupFilesCommand>("cleanup-files")
+        .WithDescription("Remove arquivos antigos com retenção configurável");
+
+    config.AddCommand<WatchCommand>("watch")
+        .WithDescription("Monitora pasta e processa novos arquivos");
 
     config.AddCommand<RoutineCommand>("routine")
         .WithDescription("Executa rotina por steps customizáveis (OCP)")
